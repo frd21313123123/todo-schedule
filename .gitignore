@@ -33,6 +33,10 @@ build/
 .dart_tool/
 pubspec.lock
 
+# Local Flutter SDK
+flutter_sdk/
+flutter_sdk.zip
+
 # OS
 .DS_Store
 Thumbs.db
