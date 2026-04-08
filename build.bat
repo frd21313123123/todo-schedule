@@ -1,26 +1,25 @@
 @echo off
+setlocal
 chcp 65001 >nul 2>&1
 title Todo Schedule - Build
 cd /d "%~dp0"
 
+echo.
 echo ============================================
 echo   Todo Schedule - Сборка проекта
 echo ============================================
 echo.
 
 :: Проверка Flutter
-where flutter >nul 2>&1
+call flutter --version >nul 2>&1
 if %errorlevel% neq 0 (
     echo [ОШИБКА] Flutter не найден в PATH!
     echo.
     echo Установите Flutter SDK:
     echo   https://docs.flutter.dev/get-started/install
     echo.
-    echo После установки добавьте путь к flutter\bin в переменную PATH.
-    echo.
-    echo Нажмите любую клавишу для выхода...
-    pause >nul
-    exit /b 1
+    echo После установки добавьте путь к flutter\bin в PATH.
+    goto :eof_pause
 )
 
 echo [OK] Flutter найден
@@ -33,8 +32,7 @@ if not exist "android" (
     call flutter create . --platforms=android,windows --org com.todo.schedule
     if %errorlevel% neq 0 (
         echo [ОШИБКА] flutter create не удался!
-        pause
-        exit /b 1
+        goto :eof_pause
     )
     echo.
 )
@@ -44,8 +42,7 @@ if not exist "windows" (
     call flutter create . --platforms=windows
     if %errorlevel% neq 0 (
         echo [ОШИБКА] flutter create не удался!
-        pause
-        exit /b 1
+        goto :eof_pause
     )
     echo.
 )
@@ -55,9 +52,10 @@ echo [*] Установка зависимостей...
 call flutter pub get
 if %errorlevel% neq 0 (
     echo [ОШИБКА] Не удалось установить зависимости!
-    pause
-    exit /b 1
+    goto :eof_pause
 )
+echo.
+echo [OK] Всё готово!
 echo.
 
 :: Меню выбора
@@ -73,6 +71,7 @@ echo   4 - Собрать App Bundle (release)
 echo   5 - Запустить на Android (debug)
 echo   6 - Выход
 echo ============================================
+set "choice="
 set /p "choice=Ваш выбор: "
 
 if "%choice%"=="1" goto run_windows
@@ -80,7 +79,7 @@ if "%choice%"=="2" goto build_windows
 if "%choice%"=="3" goto build_apk
 if "%choice%"=="4" goto build_aab
 if "%choice%"=="5" goto run_android
-if "%choice%"=="6" goto end
+if "%choice%"=="6" goto eof_pause
 
 echo Неверный выбор, попробуйте снова.
 goto menu
@@ -89,7 +88,6 @@ goto menu
 echo.
 echo [*] Запуск на Windows...
 call flutter run -d windows
-echo.
 pause
 goto menu
 
@@ -105,7 +103,6 @@ if %errorlevel% equ 0 (
 ) else (
     echo [ОШИБКА] Сборка не удалась!
 )
-echo.
 pause
 goto menu
 
@@ -121,7 +118,6 @@ if %errorlevel% equ 0 (
 ) else (
     echo [ОШИБКА] Сборка не удалась!
 )
-echo.
 pause
 goto menu
 
@@ -137,7 +133,6 @@ if %errorlevel% equ 0 (
 ) else (
     echo [ОШИБКА] Сборка не удалась!
 )
-echo.
 pause
 goto menu
 
@@ -145,12 +140,11 @@ goto menu
 echo.
 echo [*] Запуск на Android (debug)...
 call flutter run -d android
-echo.
 pause
 goto menu
 
-:end
+:eof_pause
 echo.
-echo Пока!
-timeout /t 2 >nul
-exit /b 0
+echo Нажмите любую клавишу для выхода...
+pause >nul
+endlocal
